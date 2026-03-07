@@ -464,23 +464,28 @@ void GameRenderer::moveCameraToPlayer(float a)
 	glRotatef(cameraRollO + (cameraRoll - cameraRollO) * a, 0, 0, 1);
 
 	if (player->isSleeping())
-	{
-		heightOffset += 1.0;
-		glTranslatef(0.0f, 0.3f, 0);
-		if (!mc->options->fixedCamera)
-		{
-			int t = mc->level->getTile(Mth::floor(player->x), Mth::floor(player->y), Mth::floor(player->z));
-			if (t == Tile::bed_Id)
-			{
-				int data = mc->level->getData(Mth::floor(player->x), Mth::floor(player->y), Mth::floor(player->z));
+    {
+        heightOffset += 1.0;
 
-				int direction = data & 3;
-				glRotatef((float)direction * 90,0.0f, 1.0f, 0.0f);
-			}
-			glRotatef(player->yRotO + (player->yRot - player->yRotO) * a + 180, 0, -1, 0);
-			glRotatef(player->xRotO + (player->xRot - player->xRotO) * a, -1, 0, 0);
-		}
-	}
+        float fovCompensation = (m_fov - 70.0f) * 0.005f;
+        glTranslatef(0.0f, 0.3f - fovCompensation, 0.0f);
+
+        if (!mc->options->fixedCamera)
+        {
+            int t = mc->level->getTile(Mth::floor(player->x), Mth::floor(player->y), Mth::floor(player->z));
+            if (t == Tile::bed_Id)
+            {
+                int data = mc->level->getData(Mth::floor(player->x), Mth::floor(player->y), Mth::floor(player->z));
+                int direction = data & 3;
+                glRotatef((float)direction * 90, 0.0f, 1.0f, 0.0f);
+            }
+            glRotatef(player->yRotO + (player->yRot - player->yRotO) * a + 180, 0, -1, 0);
+            glRotatef(player->xRotO + (player->xRot - player->xRotO) * a, -1, 0, 0);
+        }
+
+        // Additional forward push in local camera space after rotation
+        glTranslatef(0.0f, 0.0f, -fovCompensation);
+    }
 	// 4J-PB - changing this to be per player
 	//else if (mc->options->thirdPersonView)
 	else if (localplayer->ThirdPersonView())
