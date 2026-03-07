@@ -367,6 +367,12 @@ TexturePack *TexturePackRepository::addTexturePackFromDLC(DLCPack *dlcPack, DWOR
 	// we need to mask off the child id here to deal with this
 	DWORD dwParentID=id&0xFFFFFF; // child id is <<24 and Or'd with parent
 
+	auto it = cacheById.find(dwParentID);
+    if (it != cacheById.end())
+    {
+        return it->second;
+    }
+
 	if(dlcPack != NULL)
 	{
 		newPack = new DLCTexturePack(dwParentID, dlcPack, DEFAULT_TEXTURE_PACK);
